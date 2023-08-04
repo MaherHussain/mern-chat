@@ -10,6 +10,7 @@ dotenv.config()
 
 const RigesterRoute = require('./routes/Register')
 const ProfileRoute = require('./routes/Profile')
+const LoginRoute = require('./routes/Login')
 
 app.use(cookieParser())
 app.use(cors({
@@ -21,6 +22,7 @@ app.use(express.json())
 
 app.use('/register', RigesterRoute)
 app.use('/profile', ProfileRoute)
+app.use('/login', LoginRoute)
 
 
 app.listen(port, () => {
