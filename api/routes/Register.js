@@ -1,5 +1,5 @@
 const express = require('express');
-const app = express();
+const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv')
 const mongoose = require('mongoose')
 
@@ -18,15 +18,21 @@ router.get('/', (req, res) => {
 })
 
 router.post('/', async (req, res) => {
+    const salt = bcrypt.genSaltSync(10);
     const { email, username, password } = req.body
 
-
     try {
-        const createdUser = await userModel.create({ email, username, password })
-        jwt.sign({ userId: createdUser._id, username }, jwtSecret, {}, (err, token) => {
+        const hashedPasword = bcrypt.hashSync(password, salt)
+        const createdUser = await userModel.create({
+            email: email,
+            username: username,
+            password: hashedPasword
+        })
+        jwt.sign({ userId: createdUser._id, username, email }, jwtSecret, {}, (err, token) => {
             if (err) throw err
             res.cookie('token', token, { sameSite: 'none', secure: true }).status(201).json({
                 id: createdUser._id,
+                username: createdUser.username
             })
         })
     }

@@ -25,8 +25,5 @@ module.exports = {
         "react"
     ],
     "rules": {
-        'no-console': 'error',
-        "global-require": 0
-
     }
 }
