@@ -8,6 +8,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   const { setId, setUserEmail, setUsername } = useContext(UserContext);
+
   const navigate = useNavigate();
 
   async function loginhandle(e) {
@@ -16,10 +17,10 @@ export default function Login() {
       email,
       password,
     });
-    console.log(data);
     setUserEmail(email);
     setId(data.id);
     setUsername(data.username);
+    navigate(`/login/user?${data.username}`);
   }
   return (
     <div className="h-screen flex items-center justify-center flex-col">
