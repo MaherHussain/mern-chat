@@ -25,6 +25,8 @@ router.post('/', async (req, res) => {
                     id: user._id,
                     username: user.username
                 })
+                res.redirect(`/user?${user.username}`)
+
             })
         }
     }
