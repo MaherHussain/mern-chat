@@ -2,13 +2,16 @@ import React, { useEffect, useState, useContext } from "react";
 import { UserContext } from "./UserContext";
 import Header from "./Header";
 import Contact from "./Contact";
+import { uniqBy } from "lodash";
 export default function Chat() {
   const [ws, setWs] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
-  const { id } = useContext(UserContext);
+  const [newMessageText, setNewMessageText] = useState("");
+  const [messages, setMessages] = useState([]);
+  const { id, username } = useContext(UserContext);
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:3001/login");
+    const ws = new WebSocket(`ws://localhost:3001`);
     setWs(ws);
     ws.addEventListener("message", messageHandler);
   }, []);
@@ -23,14 +26,41 @@ export default function Chat() {
     });
     setOnlineUsers(uniqueUsers);
   }
+
   function messageHandler(e) {
     const messageData = JSON.parse(e.data);
     if ("online" in messageData) {
       showOnlineUsers(messageData.online);
+    } else if ("text" in messageData) {
+      console.log(messageData);
+      setMessages((prev) => [...prev, { ...messageData }]);
     }
+  }
+  const messagesWithoutDuplicate = uniqBy(messages, "id");
+  function sendMessage(ev) {
+    ev.preventDefault();
+
+    ws.send(
+      JSON.stringify({
+        recipient: selectedUserId,
+        text: newMessageText,
+      })
+    );
+    setNewMessageText("");
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: id,
+        recipient: selectedUserId,
+        text: newMessageText,
+        id: Date.now(),
+      },
+    ]);
+    console.log(messagesWithoutDuplicate);
   }
 
   const usersWithoutLoggedinUser = onlineUsers.filter((user) => user.id !== id);
+
   return (
     <div className="chat flex flex-col h-screen">
       <Header />
@@ -53,37 +83,51 @@ export default function Chat() {
             </div>
           ))}
         </div>
-        <div className="messages flex flex-col w-2/3 px-5">
+        <div className="messages flex flex-col w-2/3 px-3 py-3">
           <div className="flex  grow items-center justify-center ">
             {!selectedUserId ? (
               <div className="text-gray-500">Select a user to start chat </div>
             ) : (
-              <div>Messages</div>
+              <div>
+                {messagesWithoutDuplicate.map((message) => (
+                  <div key={message.id}> {message.text}</div>
+                ))}
+              </div>
             )}
           </div>
           {selectedUserId && (
-            <div className="self-end h-14 w-full flex gap-4 mb-2 border-1">
-              <textarea
-                type="text"
-                className="flex-grow px-1 rounded-3"
-                style={{ resize: "none", fontSize: "18px" }}
-              />
-              <button className="text-white bg-black px-3 rounded-3" rows="5">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+            <div className="self-end h-14 w-full">
+              <form onSubmit={sendMessage} className="">
+                <div className="flex gap-2 mb-3 ">
+                  <textarea
+                    onChange={(e) => setNewMessageText(e.target.value)}
+                    value={newMessageText}
+                    type="text"
+                    rows="2"
+                    className="flex-grow px-1 rounded-md  "
+                    style={{ resize: "none", fontSize: "18px" }}
                   />
-                </svg>
-              </button>
+                  <button
+                    className="text-white bg-blue-500 px-3 rounded-md border-sky-500  hover:bg-blue-700"
+                    type="submit"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </form>
             </div>
           )}
         </div>

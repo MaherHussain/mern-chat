@@ -12,6 +12,9 @@ const router = express.Router()
 dotenv.config()
 mongoose.connect(process.env.mongodb_URI)
 const jwtSecret = process.env.JWT_secret
+router.get('/', (req, res) => {
+    res.send('get login is ok ')
+})
 
 router.post('/', async (req, res) => {
     const { email, password } = req.body
@@ -25,8 +28,6 @@ router.post('/', async (req, res) => {
                     id: user._id,
                     username: user.username
                 })
-                res.redirect(`/user?${user.username}`)
-
             })
         }
     }
