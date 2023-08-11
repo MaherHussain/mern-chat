@@ -7,7 +7,7 @@ const dotenv = require('dotenv')
 const cookieParser = require('cookie-parser')
 const ws = require('ws')
 const jwt = require('jsonwebtoken')
-
+const messageSchema = require('./models/Message')
 
 dotenv.config()
 const jwtSecret = process.env.JWT_secret
@@ -15,8 +15,8 @@ const jwtSecret = process.env.JWT_secret
 const RigesterRoute = require('./routes/Register')
 const ProfileRoute = require('./routes/Profile')
 const LoginRoute = require('./routes/Login');
-const { connection } = require('mongoose');
-const e = require('express');
+
+
 
 app.use(cookieParser())
 app.use(cors({
@@ -55,15 +55,40 @@ wss.on('connection', (connection, req) => {
             }
         }
     }
+
+    //notify online users
     [...wss.clients].forEach(client => {
         client.send(JSON.stringify(
             {
-                online: [...wss.clients].map(c => ({
-                    id: c.userId,
-                    username: c.username
-                })
+                online: [...wss.clients].map(c => (
+                    {
+                        id: c.userId,
+                        username: c.username
+                    })
                 )
             }
         ))
     })
+
+    connection.on('message', async (message) => {
+        const messageData = JSON.parse(message.toString())
+        const { recipient, text } = messageData
+        if (recipient && text) {
+            const messageDoc = await messageSchema.create({
+                sender: connection.userId,
+                recipient,
+                text,
+            });
+            [...wss.clients]
+                .filter(u => u.userId === recipient)
+                .forEach(c => c.send(JSON.stringify({
+                    text,
+                    sender: connection.userId,
+                    recipient,
+                    id: messageDoc._id
+                })))
+        }
+    });
+
+
 })

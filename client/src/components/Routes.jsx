@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 import { UserContext } from "./UserContext";
-import Header from "./Header";
 import { Routes as Router, Route } from "react-router-dom";
 import Register from "./Register";
 import Login from "./Login";
