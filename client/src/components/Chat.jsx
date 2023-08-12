@@ -32,14 +32,15 @@ export default function Chat() {
     if ("online" in messageData) {
       showOnlineUsers(messageData.online);
     } else if ("text" in messageData) {
-      console.log(messageData);
       setMessages((prev) => [...prev, { ...messageData }]);
     }
   }
-  const messagesWithoutDuplicate = uniqBy(messages, "id");
+
   function sendMessage(ev) {
     ev.preventDefault();
-
+    if (newMessageText.trim() === "") {
+      return;
+    }
     ws.send(
       JSON.stringify({
         recipient: selectedUserId,
@@ -56,10 +57,15 @@ export default function Chat() {
         id: Date.now(),
       },
     ]);
-    console.log(messagesWithoutDuplicate);
   }
 
   const usersWithoutLoggedinUser = onlineUsers.filter((user) => user.id !== id);
+  const selectedUserName = onlineUsers.find(
+    (user) => user.id === selectedUserId
+  );
+
+  // filter messages and get the message with out dupication by loadash package
+  const messagesWithoutDuplicate = uniqBy(messages, "id");
 
   return (
     <div className="chat flex flex-col h-screen">
@@ -83,20 +89,51 @@ export default function Chat() {
             </div>
           ))}
         </div>
-        <div className="messages flex flex-col w-2/3 px-3 py-3">
-          <div className="flex  grow items-center justify-center ">
+        <div className="messages flex flex-col w-2/3 px-3 py-3 ">
+          <div className="flex-grow  ">
             {!selectedUserId ? (
               <div className="text-gray-500">Select a user to start chat </div>
             ) : (
-              <div>
-                {messagesWithoutDuplicate.map((message) => (
-                  <div key={message.id}> {message.text}</div>
-                ))}
+              <div className="relative h-full ">
+                <div className="overflow-y-scroll absolute top-0 left-0 right-0 bottom-2">
+                  <div className="mr-3 pr-3">
+                    {messagesWithoutDuplicate.map((message) => (
+                      <div
+                        className={
+                          message.sender === id ? "text-right" : "text-left"
+                        }
+                        key={message.id}
+                      >
+                        <div className="inline-block">
+                          {message.sender === id ? (
+                            <span className="text-gray-500 block text-right">
+                              Me
+                            </span>
+                          ) : (
+                            <span className="text-gray-500 block text-left text-sm truncate">
+                              {selectedUserName.username}
+                            </span>
+                          )}
+                          <div
+                            className={
+                              "text-left p-2 my-2 rounded-md text-sm " +
+                              (message.sender === id
+                                ? "bg-blue-500 text-white"
+                                : "bg-white text-gray-500")
+                            }
+                          >
+                            <p className="px-3 py-2 ">{message.text}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>
           {selectedUserId && (
-            <div className="self-end h-14 w-full">
+            <div className="self-end h-14 w-full z-50">
               <form onSubmit={sendMessage} className="">
                 <div className="flex gap-2 mb-3 ">
                   <textarea
