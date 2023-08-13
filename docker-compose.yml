@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  client:
+    build: ./client
+    container_name: client_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    working_dir: /app 
+    stdin_open: true
+    tty: true
+
+  api:
+    build: ./api
+    container_name: api_backend
+    ports:
+      - "3001:3001"
+    env_file: 
+      - ./api/.env
+    environment:
+      MONGO_URI: mongodb_URI
+    depends_on:
+      - mongo
+    volumes:
+      - ./api:/server
+      - ./api:/node_modules
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"

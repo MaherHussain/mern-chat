@@ -1,6 +1,6 @@
-/* eslint-disable react/prop-types */
 import React, { useState } from "react";
-import Avatar from "./avatar";
+import Avatar from "./Avatar";
+// eslint-disable-next-line react/prop-types
 export default function Contact({ username, userId }) {
   return (
     <div className="flex w-full gap-2 items-center border-b p-2">
