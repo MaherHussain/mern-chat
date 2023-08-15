@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { UserContext } from "./UserContext";
 import Header from "./Header";
 import Contact from "./Contact";
@@ -10,6 +10,7 @@ export default function Chat() {
   const [newMessageText, setNewMessageText] = useState("");
   const [messages, setMessages] = useState([]);
   const { id, username } = useContext(UserContext);
+
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:3001`);
     setWs(ws);
@@ -58,6 +59,17 @@ export default function Chat() {
       },
     ]);
   }
+  const divUnderMessages = useRef(null);
+  useEffect(() => {
+    const div = divUnderMessages.current;
+    if (div) {
+      div.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+        inline: "start",
+      });
+    }
+  }, [messages]);
 
   const usersWithoutLoggedinUser = onlineUsers.filter((user) => user.id !== id);
   const selectedUserName = onlineUsers.find(
@@ -127,6 +139,7 @@ export default function Chat() {
                         </div>
                       </div>
                     ))}
+                    <div className="mb-2" ref={divUnderMessages}></div>
                   </div>
                 </div>
               </div>
@@ -140,7 +153,7 @@ export default function Chat() {
                     onChange={(e) => setNewMessageText(e.target.value)}
                     value={newMessageText}
                     type="text"
-                    rows="2"
+                    rows="3"
                     className="flex-grow px-1 rounded-md  "
                     style={{ resize: "none", fontSize: "18px" }}
                   />
