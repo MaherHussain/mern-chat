@@ -3,6 +3,8 @@ import { UserContext } from "./UserContext";
 import Header from "./Header";
 import Contact from "./Contact";
 import { uniqBy } from "lodash";
+import axios from "axios";
+
 export default function Chat() {
   const [ws, setWs] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -12,10 +14,20 @@ export default function Chat() {
   const { id, username } = useContext(UserContext);
 
   useEffect(() => {
+    connectToWS();
+  }, []);
+
+  function connectToWS() {
     const ws = new WebSocket(`ws://localhost:3001`);
     setWs(ws);
     ws.addEventListener("message", messageHandler);
-  }, []);
+    ws.addEventListener("close", () => {
+      setTimeout(() => {
+        connectToWS;
+      }, 1000);
+    });
+  }
+
   function showOnlineUsers(onlineUsers) {
     const uniqueUsers = [];
     const userIds = new Set(); // To keep track of seen user IDs and ensure uniqueness
@@ -55,11 +67,13 @@ export default function Chat() {
         sender: id,
         recipient: selectedUserId,
         text: newMessageText,
-        id: Date.now(),
+        _id: Date.now(),
       },
     ]);
   }
   const divUnderMessages = useRef(null);
+
+  // this use effect to do scrolling to last massage
   useEffect(() => {
     const div = divUnderMessages.current;
     if (div) {
@@ -71,13 +85,19 @@ export default function Chat() {
     }
   }, [messages]);
 
+  useEffect(() => {
+    axios.get("/messages/" + selectedUserId).then((response) => {
+      setMessages(response.data);
+    });
+  }, [selectedUserId]);
+
   const usersWithoutLoggedinUser = onlineUsers.filter((user) => user.id !== id);
   const selectedUserName = onlineUsers.find(
     (user) => user.id === selectedUserId
   );
 
   // filter messages and get the message with out dupication by loadash package
-  const messagesWithoutDuplicate = uniqBy(messages, "id");
+  const messagesWithoutDuplicate = uniqBy(messages, "_id");
 
   return (
     <div className="chat flex flex-col h-screen">
@@ -114,7 +134,7 @@ export default function Chat() {
                         className={
                           message.sender === id ? "text-right" : "text-left"
                         }
-                        key={message.id}
+                        key={message._id}
                       >
                         <div className="inline-block">
                           {message.sender === id ? (
