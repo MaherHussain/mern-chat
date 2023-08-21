@@ -1,1 +1,5 @@
-{}
+{ "scripts": {
+    "client": "cd client && npm run dev",
+    "api": "cd api && nodemon -L server.js"
+  }
+}

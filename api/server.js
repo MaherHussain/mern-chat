@@ -15,6 +15,7 @@ const jwtSecret = process.env.JWT_secret
 const RigesterRoute = require('./routes/Register')
 const ProfileRoute = require('./routes/Profile')
 const LoginRoute = require('./routes/Login');
+const MessagesRoute = require('./routes/Messages')
 
 
 
@@ -29,6 +30,7 @@ app.use(express.json())
 app.use('/register', RigesterRoute)
 app.use('/profile', ProfileRoute)
 app.use('/login', LoginRoute)
+app.use('/messages', MessagesRoute)
 
 
 const server = app.listen(port, () => {
@@ -85,7 +87,7 @@ wss.on('connection', (connection, req) => {
                     text,
                     sender: connection.userId,
                     recipient,
-                    id: messageDoc._id
+                    _id: messageDoc._id
                 })))
         }
     });
