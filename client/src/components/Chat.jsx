@@ -121,8 +121,8 @@ export default function Chat() {
             </div>
           ))}
         </div>
-        <div className="messages flex flex-col w-2/3 px-3 py-3 ">
-          <div className="flex-grow  ">
+        <div className="messages flex flex-col w-2/3 px-3 py-1">
+          <div className="flex-grow">
             {!selectedUserId ? (
               <div className="text-gray-500">Select a user to start chat </div>
             ) : (
@@ -166,9 +166,9 @@ export default function Chat() {
             )}
           </div>
           {selectedUserId && (
-            <div className="self-end h-14 w-full z-50">
+            <div className="self-end w-full z-50">
               <form onSubmit={sendMessage} className="">
-                <div className="flex gap-2 mb-3 ">
+                <div className="flex gap-2 mb-1 ">
                   <textarea
                     onChange={(e) => setNewMessageText(e.target.value)}
                     value={newMessageText}
