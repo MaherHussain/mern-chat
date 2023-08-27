@@ -16,6 +16,7 @@ const RigesterRoute = require('./routes/Register')
 const ProfileRoute = require('./routes/Profile')
 const LoginRoute = require('./routes/Login');
 const MessagesRoute = require('./routes/Messages')
+const UsersRoute = require('./routes/Users')
 
 
 
@@ -31,6 +32,7 @@ app.use('/register', RigesterRoute)
 app.use('/profile', ProfileRoute)
 app.use('/login', LoginRoute)
 app.use('/messages', MessagesRoute)
+app.use('/users', UsersRoute)
 
 
 const server = app.listen(port, () => {
@@ -64,7 +66,7 @@ wss.on('connection', (connection, req) => {
             {
                 online: [...wss.clients].map(c => (
                     {
-                        id: c.userId,
+                        _id: c.userId,
                         username: c.username
                     })
                 )

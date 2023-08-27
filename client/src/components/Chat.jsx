@@ -8,6 +8,7 @@ import axios from "axios";
 export default function Chat() {
   const [ws, setWs] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [offlineUsers, setOfflineUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [newMessageText, setNewMessageText] = useState("");
   const [messages, setMessages] = useState([]);
@@ -31,10 +32,10 @@ export default function Chat() {
   function showOnlineUsers(onlineUsers) {
     const uniqueUsers = [];
     const userIds = new Set(); // To keep track of seen user IDs and ensure uniqueness
-    onlineUsers.forEach(({ id, username }) => {
-      if (!userIds.has(id)) {
-        userIds.add(id);
-        uniqueUsers.push({ id, username });
+    onlineUsers.forEach(({ _id, username }) => {
+      if (!userIds.has(_id)) {
+        userIds.add(_id);
+        uniqueUsers.push({ _id, username, online: true });
       }
     });
     setOnlineUsers(uniqueUsers);
@@ -48,7 +49,6 @@ export default function Chat() {
       setMessages((prev) => [...prev, { ...messageData }]);
     }
   }
-
   function sendMessage(ev) {
     ev.preventDefault();
     if (newMessageText.trim() === "") {
@@ -91,10 +91,24 @@ export default function Chat() {
     });
   }, [selectedUserId]);
 
-  const usersWithoutLoggedinUser = onlineUsers.filter((user) => user.id !== id);
-  const selectedUserName = onlineUsers.find(
-    (user) => user.id === selectedUserId
+  useEffect(() => {
+    axios.get("/users").then((response) => {
+      const offlineUsers = response.data
+        .filter((u) => u._id != id)
+        .filter(
+          (p) => !onlineUsers.map((oluser) => oluser._id).includes(p._id)
+        );
+      setOfflineUsers(offlineUsers);
+    });
+  }, [onlineUsers]);
+
+  const allUsers = [...onlineUsers, ...offlineUsers];
+
+  const usersWithoutLoggedinUser = onlineUsers.filter(
+    (user) => user._id !== id
   );
+
+  const selectedUserName = allUsers.find((user) => user._id === selectedUserId);
 
   // filter messages and get the message with out dupication by loadash package
   const messagesWithoutDuplicate = uniqBy(messages, "_id");
@@ -107,17 +121,41 @@ export default function Chat() {
           {usersWithoutLoggedinUser.map((user) => (
             <div
               className={
-                "flex cursor-pointer " +
+                "flex cursor-pointer" +
                 "" +
-                (user.id === selectedUserId ? "bg-blue-200" : "")
+                (user._id === selectedUserId ? "bg-blue-200" : "")
               }
-              key={user.id}
-              onClick={() => setSelectedUserId(user.id)}
+              key={user._id}
+              onClick={() => setSelectedUserId(user._id)}
             >
-              {user.id === selectedUserId && (
+              {user._id === selectedUserId && (
                 <div className="w-1 h-12 bg-blue-500 rounded-r-md"></div>
               )}
-              <Contact username={user.username} userId={user.id} />
+              <Contact
+                username={user.username}
+                userId={user._id}
+                isOnline={user.online}
+              />
+            </div>
+          ))}
+          {offlineUsers.map((user) => (
+            <div
+              className={
+                "flex cursor-pointer" +
+                "" +
+                (user._id === selectedUserId ? "bg-blue-200" : "")
+              }
+              key={user._id}
+              onClick={() => setSelectedUserId(user._id)}
+            >
+              {user._id === selectedUserId && (
+                <div className="w-1 h-12 bg-blue-500 rounded-r-md"></div>
+              )}
+              <Contact
+                username={user.username}
+                userId={user._id}
+                isOnline={user.online}
+              />
             </div>
           ))}
         </div>

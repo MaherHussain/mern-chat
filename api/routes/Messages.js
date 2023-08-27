@@ -3,7 +3,6 @@ const dotenv = require('dotenv')
 const mongoose = require('mongoose')
 const MessageModel = require('../models/Message')
 const jwt = require('jsonwebtoken');
-const { json } = require('express');
 
 const router = express.Router()
 
@@ -41,7 +40,7 @@ router.get('/:userId', async (req, res) => {
         }).sort({ createdAt: 1 });
         res.json(messages)
     } catch (error) {
-        console.log(error)
+        return error
     }
 
 })
