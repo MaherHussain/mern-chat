@@ -68,6 +68,7 @@ wss.on('connection', (connection, req) => {
         connection.deathTimer = setTimeout(() => {
             connection.isAlive = false
             connection.terminate()
+            clearInterval(connection.timer)
             notifyAboutOnlineUsers()
         }, 1000)
     }, 5000)
