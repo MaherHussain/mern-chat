@@ -115,7 +115,7 @@ export default function Chat() {
 
   return (
     <div className="chat flex flex-col h-screen">
-      <Header />
+      <Header setWs={() => setWs(null)} />
       <div className="chat-content flex flex-row h-screen">
         <div className="contacts w-1/3 bg-white py-5">
           {usersWithoutLoggedinUser.map((user) => (

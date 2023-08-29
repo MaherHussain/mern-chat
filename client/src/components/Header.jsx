@@ -3,12 +3,13 @@ import { UserContext } from "./UserContext";
 import axios from "axios";
 import { useNavigate } from "react-router";
 
-export default function Header() {
+export default function Header(setWs) {
   const { username, setUsername, setId } = useContext(UserContext);
   const navigate = useNavigate();
 
   function logout() {
     axios.post("/logout").then(() => {
+      setWs;
       setId(null);
       setUsername(null);
     });
