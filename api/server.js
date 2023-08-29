@@ -15,6 +15,7 @@ const jwtSecret = process.env.JWT_secret
 const RigesterRoute = require('./routes/Register')
 const ProfileRoute = require('./routes/Profile')
 const LoginRoute = require('./routes/Login');
+const LogoutRoute = require('./routes/Logout');
 const MessagesRoute = require('./routes/Messages')
 const UsersRoute = require('./routes/Users')
 
@@ -31,6 +32,7 @@ app.use(express.json())
 app.use('/register', RigesterRoute)
 app.use('/profile', ProfileRoute)
 app.use('/login', LoginRoute)
+app.use('/logout', LogoutRoute)
 app.use('/messages', MessagesRoute)
 app.use('/users', UsersRoute)
 
