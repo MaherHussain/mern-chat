@@ -1,5 +1,25 @@
-{ "scripts": {
+{
+  "name": "mern-chat",
+  "version": "1.0.0",
+  "scripts": {
     "client": "cd client && npm run dev",
-    "api": "cd api && nodemon -L server.js"
+    "api": "cd api && nodemon -L server.js",
+    "lint": "eslint . --ext .js,.jsx --report-unused-disable-directives --max-warnings 0",
+    "prepare": "husky install"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint && npm run client && npm run api"
+    }
+  },
+  "lint-staged":{
+    "**/*.{js,jsx,ts,tsx}":[
+      "npx prettier --write",
+      "npx eslint --fix"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^8.0.0",
+    "lint-staged": "^14.0.1"
   }
 }
